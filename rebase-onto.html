@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>git rebase --onto</title>
+
+		<meta name="author" content="Piotr Jasiun">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<style type="text/css">
+			p.git-graph {
+				color: #DCDCDC;
+				width: 90%;
+				margin: 15px auto;
+				text-align: left;
+				font-size: .55em;
+				font-family: monospace;
+				word-wrap: break-word;
+				box-shadow: 0 0 6px rgba(0,0,0,.3);
+				background: #3F3F3F;
+				white-space: pre;
+			}
+
+			p.git-graph .important-commit {
+				color: red;
+			}
+
+			p.git-command {
+				width: 90%;
+				font-family: monospace;
+				word-wrap: break-word;
+				white-space:nowrap;
+			}
+
+			p.git-command .keyword {
+				font-weight: bold;
+				color:#13daec;
+			}
+
+			.upstream {
+				color: #6E87DB;
+			}
+			.newbase {
+				color: #71DB6E;
+			}
+			.branch {
+				color: #DB5353;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>git rebase --onto</h1>
+					<p>Created by <a href="mailto:piotr@jasiun.pl">Piotr Jasiun</a></p>
+				</section>
+
+				<section>
+					<h2>git rebase</h2>
+					<p class="git-graph"><code>
+  M1 ---  M2 --- M3 --- M4
+           \
+            <span class="important-commit">A1</span> --- <span class="important-commit">A2</span> <em>(HEAD)</em>
+					</code></p>
+					<h2>&#8595;</h2>
+					<p class="git-command fragment"><code><span class="keyword">git</span> <span class="keyword">rebase</span> master</code></p>
+					<p class="git-graph"><code>
+  M1 --- M2 --- M3 --- M4 --- <span class="important-commit">A1</span> --- <span class="important-commit">A2</span> <em>(HEAD)</em>
+					</code></p>
+				</section>
+				<section>
+					<h2>git rebase --onto</h2>
+					<p class="git-graph"><code>
+M1 ---  M2 --- <span class="important-commit">password</span> --- M4
+					</code></p>
+					<h2>&#8595;</h2>
+					<p class="git-command fragment"><code><span class="keyword">git</span> <span class="keyword">rebase</span> <span class="keyword">--onto</span> M2 password</code></p>
+					<p class="git-graph"><code>
+M1 ---  M2 --- M4
+					</code></p>
+				</section>
+				<section>
+					<h2>Wait a second!</h2>
+
+					<h3>git rebase</h3>
+					<p class="git-command"><code><span class="keyword">git</span> <span class="keyword">rebase</span> master</code></p>
+					<ul style="width:60%;margin-bottom:40px">
+						<li>'master' is a branch,</li>
+						<li>we do rebase onto master,</li>
+						<li>we change the parent of whole branch.</li>
+					</ul>
+
+					<h3>git rebase --onto</h3>
+					<p class="git-command"><code><span class="keyword">git</span> <span class="keyword">rebase</span> <span class="keyword">--onto</span> M2 password</code></p>
+					<ul style="width:60%">
+						<li>'M2' and 'password' are commits,</li>
+						<li>we rebase 'password' onto 'M2',</li>
+						<li>we change the parent of the commit.</li>
+					</ul>
+				</section>
+				<section>
+					<section>
+						<h2>What is branch?</h2>
+					</section>
+
+					<section>
+						<h2>What branch is not?</h2>
+						<p class="git-graph"><code>
+  M1 ---  M2 --- M3 --- M4
+           \
+            <span class="fragment highlight-current-red" data-fragment-index="1">A1</span> --- <span class="fragment highlight-current-red" data-fragment-index="1">A2</span> <em>(HEAD)</em>
+						</code></p>
+					</section>
+
+					<section>
+						<h2>So what is branch?</h2>
+						<p class="git-graph"><code>
+  M1 ---  M2 --- M3 --- M4
+           \
+            A1 --- <span class="fragment highlight-current-red" data-fragment-index="1">A2</span> <em>(HEAD)</em>
+						</code></p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>How it works?</h2>
+					</section>
+					<section>
+						<h2>What git do is:</h2>
+						<ul>
+							<li>git rebase always uses 3 branches to do rebase
+							<p class="git-command"><code><span class="keyword">git</span> <span class="keyword">rebase</span> [<span class="keyword">--onto</span> <span class="newbase">newbase</span>] [<span class="upstream">upstream</span>] [<span class="branch">branch</span>]</code></p>
+							<ul>
+								<li>if <code><span class="newbase">newbase</span></code> is not set (if there is not --onto) then<br><code><span class="newbase">newbase</span></code> = <code><span class="upstream">upstream</span></code>,</li>
+								<li>if <code><span class="branch">branch</span></code> is not set then<br>
+									<code><span class="branch">branch</span></code> = HEAD.</li>
+							</ul>
+							</li>
+							<li>git looks for common parent of <code><span class="upstream">upstream</span></code> and <code><span class="branch">branch</span></code>,</li>
+							<li>git takes from <code><span class="upstream">upstream</span></code> the child of that parent and change the parent of that commit to <code><span class="newbase">newbase</span></code>.</li>
+						</ul>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Example</h2>
+						<p class="git-graph"><code>
+M1---M2---M3---<span class="fragment highlight-blue" data-fragment-index="3">M4</span> <em>(master)</em> &lt;newbase&gt;
+      \
+       A1---<span class="fragment highlight-current-red" data-fragment-index="1">A2</span>---A3 <em>(branch-a)</em> &lt;upstream&gt;
+             \
+              <span class="fragment highlight-red" data-fragment-index="2">B1</span>---B2 <em>(branch-b)</em> &lt;branch&gt;
+					</code></p>
+					<h2>&#8595;</h2>
+					<p class="git-command"><code><span class="keyword">git</span> <span class="keyword">rebase</span> <span class="keyword">--onto</span> master branch-a branch-b</code></p>
+					<p class="git-graph"><code>
+M1---M2---M3---<span class="fragment highlight-blue" data-fragment-index="3">M4</span> <em>(master)</em> &lt;newbase&gt;
+     \          \
+      \          <span class="fragment highlight-red" data-fragment-index="2">B1</span>---B2 <em>(branch-b)</em> &lt;branch&gt;
+       \
+        A1---A2---A3 <em>(branch-a)</em> &lt;upstream&gt;
+					</code></p>
+					</section>
+				</section>
+				<section>
+					<h2>git rebase</h2>
+					<p class="git-graph"><code>
+  M1 ---  M2 --- M3 --- M4
+           \
+            <span class="important-commit">A1</span> --- <span class="important-commit">A2</span> <em><em>(HEAD)</em></em>
+					</code></p>
+					<h2>&#8595;</h2>
+					<p class="git-command"><code><span class="keyword">git</span> <span class="keyword">rebase</span> master</code></p>
+					<p class="git-command fragment"><code><span class="keyword">git</span> <span class="keyword">rebase</span> <span class="keyword">--onto</span> master master HEAD</code></p>
+					<p class="git-graph"><code>
+  M1 --- M2 --- M3 --- M4 --- <span class="important-commit">A1</span> --- <span class="important-commit">A2</span> <em>(HEAD)</em>
+					</code></p>
+				</section>
+				<section>
+					<h2>git rebase <span class="keyword">--onto</span></h2>
+					<p class="git-graph"><code>
+M1 ---  M2 --- <span class="important-commit">password</span> --- M4
+					</code></p>
+					<h2>&#8595;</h2>
+					<p class="git-command"><code><span class="keyword">git</span> <span class="keyword">rebase</span> <span class="keyword">--onto</span> M2 password</code></p>
+					<p class="git-command fragment"><code><span class="keyword">git</span> <span class="keyword">rebase</span> <span class="keyword">--onto</span> M2 password HEAD</code></p>
+					<p class="git-graph"><code>
+M1 ---  M2 --- M4
+					</code></p>
+				</section>
+				<section>
+					<h2>Lets play with it!</h2>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

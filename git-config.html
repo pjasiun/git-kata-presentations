@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>git config</title>
+
+		<meta name="author" content="Piotr Jasiun">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<style type="text/css">
+			.git-tree {
+				display: block;
+				position: relative;
+				width: 90%;
+				margin: 15px auto;
+				text-align: left;
+				font-size: .55em;
+				font-family: monospace;
+				line-height: 1.2em;
+				word-wrap: break-word;
+				box-shadow: 0 0 6px rgba(0,0,0,.3);
+
+				white-space: pre;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>git config</h1>
+					<p>Created by <a href="mailto:piotr@jasiun.pl">Piotr Jasiun</a></p>
+				</section>
+				<section>
+					<h2>Config file(s)</h2>
+					<ul>
+						<li>
+							<p>.git/config</p>
+							<p><small>Repository specific configuration file.</small></p>
+						</lli>
+						<p>
+							<p>~/.gitconfig</p>
+							<p><small>User-specific configuration file ("global").</small></p>
+						</tr>
+						<li>
+							<p>$XDG_CONFIG_HOME/git/config</p>
+							<p><small>Second user-specific configuration file.</small></p>
+							<p><small>If $XDG_CONFIG_HOME is not selior empty, $HOME/.config/git/config will be used.</small></p>
+						</tr>
+						<li>
+							<p>/etc/gitconfig</p>
+							<p><small>System-wide configuration file.</small></p>
+						</li>
+					</ul>
+				</section>
+				<section>
+				<h2>Config file - INI format</h2>
+<pre><code class="ini">[core]
+	# Remotes where new branches should be put
+	default-remote = "origin"
+	editor = sublime -w
+
+[user]
+	name = "Piotr Jasiun"
+	email = p.jasiun@cksource.com
+
+[alias]
+	meld = !/opt/git-meld/git-meld.pl
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Config command</h2>
+
+					<pre><code class="bash">git config user.name</code></pre>
+
+					<pre><code class="bash">git config user.name "Piotr Jasiun"</code></pre>
+
+					<pre><code class="bash">git config --global user.name "Piotr Jasiun"</code></pre>
+					<ul>
+						<li>local: .git/config </li>
+						<li>global: ~/.gitconfig or $XDG_CONFIG_HOME/git/config</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Basic configuration</h2>
+<pre><code class="ini">[core]
+	editor = sublime -w
+
+[user]
+	name = "Piotr Jasiun"
+	email = p.jasiun@cksource.com
+
+[color]
+	ui = auto
+
+[branch]
+	autosetuprebase = always
+
+[push]
+	default = current
+
+</code></pre>
+				</section>
+				<section>
+					<h2>Basic aliases</h2>
+<pre><code class="ini">[alias]
+	co = checkout
+	cc = commit
+	ca = commit -a
+	st = status
+	br = branch
+	fa = fetch --all -p
+	hash = log -1 --format="%h"
+
+</code></pre>
+				</section>
+				<section>
+					<h2>Graphical aliases</h2>
+<pre><code class="ini">[alias]
+	# Show graph.
+	graph = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
+
+	# Show character differences (in contrast to diff which show line differences).
+	dif = diff --color-words=[^[:space:]]|([[:alnum:]]|UTF_8_GUARD)+
+
+</code></pre>
+					<img src="./images/git-config/git-graph.png">
+				</section>
+				<section>
+					<section>
+						<h2>Variables and inline sh</h2>
+<pre><code class="ini">[core]
+	# Remotes where new branches should be put
+	default-remote = "origin"
+
+[alias]
+	# Get branch name.
+	get-branch = rev-parse --abbrev-ref HEAD
+
+	# Get branch remote name. Don't forget to configure core.default-remote.
+	get-remote = !sh -c 'branch=$(git get-branch) && rem=$(git config branch.$branch.remote || git config core.default-remote) && echo $rem'
+
+	# Push current branch to remote. If there is no remote branch in will be created in default-remote.
+	pp = !sh -c 'remote=$(git get-remote) && branch=$(git get-branch) && git push $remote $branch'
+
+	# reset --hard current branch with proper branch from remote.
+	rh = !sh -c 'remote=$(git get-remote) && branch=$(git get-branch) && git reset --hard "$remote/$branch"'
+
+</code></pre>
+					</section>
+					<section>
+						<h2>.git/config</h2>
+<pre><code class="ini">[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	branch-remote = cksource
+	default-remote = cksource
+[remote "ckeditor"]
+	url = git@github.com:ckeditor/ckeditor-dev.git
+	fetch = +refs/heads/*:refs/remotes/ckeditor/*
+[branch "master"]
+	remote = ckeditor
+	merge = refs/heads/master
+[remote "cksource"]
+	url = git@github.com:cksource/ckeditor-dev.git
+	fetch = +refs/heads/*:refs/remotes/cksource/*
+[branch "major"]
+	remote = ckeditor
+	merge = refs/heads/major
+	rebase = true
+[branch "t/10027"]
+	remote = cksource
+	merge = refs/heads/t/10027
+	rebase = true
+
+</code></pre>
+					</section>
+				</section>
+				<section>
+					<h2>sh scripts</h2>
+					<p>Create file: <code>/bin/git-dbr</code></p>
+					<p>Usage: <code>git dbr my_branch</code></p>
+<pre><code class="bash">#!/bin/sh
+
+# Delete both local and remote branch.
+
+if [ -z $1 ]; then
+	echo "Branch name required."
+	exit
+fi
+
+REMOTE=$(git getremote $1)
+EXIST=$(git branch | grep -w $1)
+
+if [ -n "$REMOTE" ]; then
+	git push $REMOTE :$1
+else
+	echo "Branch has no remote."
+fi
+
+if [ -n "$EXIST" ]; then
+	git br -D $1
+else
+	echo "Branch doesn't exist locally."
+fi
+</code></pre>
+				</section>
+				<section>
+					<h2>git wtf</h2>
+					<p>Displays the state of your repository in a readable and easy-to-scan format.</p>
+					<p><a href="http://git-wt-commit.rubyforge.org/git-wtf">http://git-wt-commit.rubyforge.org/git-wtf</a></p>
+					<p><img src="./images/git-config/git-wtf.png"></p>
+
+				</section>
+				<section>
+					<h2>Git prompt</h2>
+					<p>Displays information about the current git repository.</p>
+					<p><a href="https://github.com/magicmonty/bash-git-prompt">https://github.com/magicmonty/bash-git-prompt</a></p>
+					<p><img src="./images/git-config/git-prompt.png"></p>
+
+					<ul>
+						<li><p><code>(master↑3|✚1)</code></p>
+							<p><small>On branch master, ahead of remote by 3 commits, 1 file changed but not staged.</small></p></li>
+						<li><p><code>(master|✚7…)</code></p>
+							<p><small>On branch master, 7 files changed, some files untracked.</small></p></li>
+						<li><p><code>(:70c2952|✔)</code></p>
+							<p><small>Not on any branch; parent commit has hash 70c2952; the repository is otherwise clean.</small></p></li>
+					</ul>
+
+				</section>
+				<section>
+					<h2>This is (not) the end.</h2>
+				</section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
