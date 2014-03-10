@@ -1,0 +1,36 @@
+Git Internals
+
+git hash-object a
+git hash-object -w a
+(echo 'test content' | git hash-object -w --stdin)
+
+git update-index test.txt
+git update-index --add new.txt
+(git update-index --add --cacheinfo 100644 83baae6 test.txt)
+
+git ls-files
+git write-tree
+
+tree .git/objects/
+(find .git/objects -type f)
+
+git cat-file -p d670460 (print)
+git cat-file -t d670460 (type)
+
+(git ls-tree d670460 == git cat-file -p d670460 )
+(git ls-tree master)
+(git mktree)
+
+echo 'first commit' | git commit-tree d8329f
+echo 'second commit' | git commit-tree 0155eb -p fdf4fc3
+
+git tag -a v1.1 -m 'my version 1.1'
+
+git symbolic-ref HEAD (read)
+git symbolic-ref HEAD refs/heads/test (write)
+Manually:
+echo "ref: refs/heads/master" > .git/HEAD
+(git rev-parse refs/heads/master)
+
+git gc
+git verify-pack -v .git/objects/pack/pack-7a16e4488ae40c7d2bc56ea2bd43e25212a66c45.idx
