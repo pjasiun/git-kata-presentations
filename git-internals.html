@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>git internals</title>
+
+		<meta name="author" content="Piotr Jasiun">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<style type="text/css">
+			.column {
+				width: 50%;
+				float: left;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<section>
+						<h1>git internals</h1>
+						<p>Created by <a href="mailto:piotr@jasiun.pl">Piotr Jasiun</a></p>
+					</section>
+					<section>
+						<blockquote>
+							<p>"First, if it isn’t yet clear, Git is fundamentally a content-addressable filesystem with a VCS user interface written on top of it."</p>
+						</blockquote>
+						<footer><cite><a href="http://git-scm.com/book/en/Git-Internals">Pro Git</a></cite></footer>
+					</section>
+				</section>
+				<section>
+					<div class="column">
+						<h2>Porcelain</h2>
+						<ul>
+							<li>git commit</li>
+							<li>git checkout</li>
+							<li>git add</li>
+							<li>git merge</li>
+							<li>git reset</li>
+							<li>git stash</li>
+							<li>git pull</li>
+							<li>git rebase</li>
+							<li>...</li>
+						</ul>
+					</div>
+					<div class="column">
+						<h2>Plumbing</h2>
+						<ul>
+							<li>git hash-object</li>
+							<li>git cat-file</li>
+							<li>git write-tree</li>
+							<li>git mktree</li>
+							<li>git update-index</li>
+							<li>git commit-tree</li>
+							<li>git symbolic-ref</li>
+							<li>git rev-parse</li>
+							<li>...</li>
+						</ul>
+					</div>
+				</section>
+				<section>
+					<h2>.git</h2>
+					<ul>
+						<li>branches/<span class="fragment" data-fragment-index="1"> - not used</span></li>
+						<li>config</li>
+						<li>description<span class="fragment" data-fragment-index="2"> - only used by the GitWeb program</span></li>
+						<li><span class="fragment highlight-current-red" data-fragment-index="5">HEAD</span></li>
+						<li>hooks/<span class="fragment" data-fragment-index="3"> - client- or server-side hook scripts</span></li>
+						<li><span class="fragment highlight-current-red" data-fragment-index="5">index</span></li>
+						<li><span class="fragment highlight-current-red" data-fragment-index="5">objects/</span></li>
+						<li><span class="fragment highlight-current-red" data-fragment-index="5">refs/</span></li>
+						<li>info/<span class="fragment" data-fragment-index="4"> - global exclude file that you don’t want to track in a .gitignore file</span></li>
+					</lu>
+				</section>
+				<section>
+					<h2>Git Objects: Blob and Tree</h2>
+					<p><img src="./images/git-internals/tree-blob.png"></p>
+				</section>
+				<section>
+					<h2>Git Objects: Commit</h2>
+					<p><img src="./images/git-internals/commit-tree-blob-details.png"></p>
+				</section>
+				<section>
+					<h2>Git Objects: Commit</h2>
+					<p><img src="./images/git-internals/commit-tree-blob.jpg"></p>
+				</section>
+				<section>
+					<section>
+						<h2>References</h2>
+						<p><img src="./images/git-internals/refs-commit-tree-blob.png"></p>
+						<ul class="fragment">
+							<li>HEAD, branches (local and remote) and tags are files with commits hashes,</li>
+							<li>annotated tags are obeject (like commit or blob),</li>
+							<li>HEAD could be a reference to the branch:
+								<pre><code>ref: refs/heads/master</code></pre>
+							</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Remotes</h2>
+						<pre><code class="ini">
+[remote "origin"]
+    url = git@github.com:schacon/simplegit-progit.git
+    fetch = +refs/heads/*:refs/remotes/origin/*
+						</code></pre>
+					</section>
+				</section>
+				<section>
+					<h2>Packfiles</h2>
+					<ul>
+						<li>git gc - garbage collection,</li>
+						<li>.idx and .pack files,</li>
+						<li>one snapshots and diffs,</li>
+						<li>repacking,</li>
+						<li>smaller than SVN.</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Summary</h2>
+					<ul>
+						<li>whole repo is it the .git directory,</li>
+						<li>git works like a filesystem or NoSQL database,</li>
+						<li>every commit contains files, not diffs,</li>
+						<li>HEAD, branches and tags are references to commits,</li>
+						<li>if you need you can become a plumber.</li>
+					</ul>
+				</section>
+				<section>
+					<section>
+						<p><img src="./images/git-internals/thats-all-folks.jpg"></p>
+					</section>
+					<section>
+						<h2>Links</h2>
+						<ul>
+							<li><a href="http://git-scm.com/book/en/Git-Internals">Pro Git - Git Internals</a></li>
+							<li><a href="https://www.kernel.org/pub/software/scm/git/docs/git.html">git commands</a></li>
+							<li><a href="https://www.kernel.org/pub/software/scm/git/docs/git-hash-object.html">git hash-object</a></li>
+							<li><a href="https://www.kernel.org/pub/software/scm/git/docs/git-cat-file.html">git cat-file</a></li>
+							<li><a href="https://www.kernel.org/pub/software/scm/git/docs/git-write-tree.html">git write-tree</a></li>
+							<li><a href="https://www.kernel.org/pub/software/scm/git/docs/git-update-index.html">git update-index</a></li>
+							<li><a href="https://www.kernel.org/pub/software/scm/git/docs/git-commit-tree.html">git commit-tree</a></li>
+							<li><a href="https://www.kernel.org/pub/software/scm/git/docs/git-mktree.html">git mktree</a></li>
+							<li><a href="https://www.kernel.org/pub/software/scm/git/docs/git-symbolic-ref.html">git symbolic-ref</a></li>
+							<li><a href="https://www.kernel.org/pub/software/scm/git/docs/git-rev-parse.html">git rev-parse</a></li>
+							<li><a href="http://alblue.bandlem.com/2011/08/git-tip-of-week-trees.html">git trees article</a></li>
+							<li><a href="http://stackoverflow.com/questions/5772192/git-how-can-i-reconcile-detached-head-with-master-origin">detached HEAD</a></li>
+						</ul>
+					</section>
+				</section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
